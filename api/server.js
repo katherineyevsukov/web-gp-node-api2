@@ -1,103 +1,41 @@
-const express = require('express')
-const Adopter = require('./adopters-model.js')
-const router = express.Router()
+// BREAK UP THIS MONOLITHIC FILE USING ROUTES
+// BREAK UP THIS MONOLITHIC FILE USING ROUTES
+// BREAK UP THIS MONOLITHIC FILE USING ROUTES
+const express = require('express');
+const adoptersRouter = require('./adopters/adopters-router');
 
-// endpoints here that have to do with adopters
-// every request falling through here is assumed
-// to start with /api/adopters
-router.get('/', (req, res) => {
-  Adopter.find(req.query)
-    .then(adopters => {
-      res.status(200).json(adopters);
-    })
-    .catch(error => {
-      console.log(error);
-      res.status(500).json({
-        message: 'Error retrieving the adopters',
-      });
-    });
-});
+const server = express();
 
-router.get('/:id', (req, res) => {
-  Adopter.findById(req.params.id)
-    .then(adopter => {
-      if (adopter) {
-        res.status(200).json(adopter);
-      } else {
-        res.status(404).json({ message: 'Adopter not found' });
-      }
-    })
-    .catch(error => {
-      console.log(error);
-      res.status(500).json({
-        message: 'Error retrieving the adopter',
-      });
-    });
-});
+server.use(express.json());
 
-router.get('/:id/dogs', (req, res) => {
-  Adopter.findDogs(req.params.id)
+server.use('/api/adopters', adoptersRouter); // connecting the router
+
+const Dog = require('./dogs/dogs-model');
+
+// DOGS ENDPOINTS
+// DOGS ENDPOINTS
+// DOGS ENDPOINTS
+server.get('/api/dogs', (req, res) => {
+  Dog.find()
     .then(dogs => {
-      if (dogs.length > 0) {
-        res.status(200).json(dogs);
-      } else {
-        res.status(404).json({ message: 'No dogs for this adopter' });
-      }
+      res.status(200).json(dogs);
     })
     .catch(error => {
       console.log(error);
       res.status(500).json({
-        message: 'Error retrieving the dogs for this adopter',
+        message: 'Error retrieving the dogs',
       });
     });
 });
 
-router.post('/', (req, res) => {
-  Adopter.add(req.body)
-    .then(adopter => {
-      res.status(201).json(adopter);
-    })
-    .catch(error => {
-      console.log(error);
-      res.status(500).json({
-        message: 'Error adding the adopter',
-      });
-    });
+// OTHER ENDPOINTS
+// OTHER ENDPOINTS
+// OTHER ENDPOINTS
+server.get('/', (req, res) => {
+  res.send(`
+    <h2>Lambda Shelter API</h>
+    <p>Welcome to the Lambda Shelter API</p>
+  `);
 });
 
-router.delete('/:id', (req, res) => {
-  Adopter.remove(req.params.id)
-    .then(count => {
-      if (count > 0) {
-        res.status(200).json({ message: 'The adopter has been nuked' });
-      } else {
-        res.status(404).json({ message: 'The adopter could not be found' });
-      }
-    })
-    .catch(error => {
-      console.log(error);
-      res.status(500).json({
-        message: 'Error removing the adopter',
-      });
-    });
-});
-
-router.put('/:id', (req, res) => {
-  const changes = req.body;
-  Adopter.update(req.params.id, changes)
-    .then(adopter => {
-      if (adopter) {
-        res.status(200).json(adopter);
-      } else {
-        res.status(404).json({ message: 'The adopter could not be found' });
-      }
-    })
-    .catch(error => {
-      console.log(error);
-      res.status(500).json({
-        message: 'Error updating the adopter',
-      });
-    });
-});
-
-module.exports = router
+module.exports = server;
