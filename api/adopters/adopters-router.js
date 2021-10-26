@@ -6,6 +6,10 @@ const router = express.Router()
 // every request falling through here is assumed
 // to start with /api/adopters
 router.get('/', (req, res) => {
+  // 1- req.params /:foo/:bar
+  // 2- req.body   { "foo": "bar" }
+  // 3- req.headers
+  // 4- req.query [GET] /?search=cats
   Adopter.find(req.query)
     .then(adopters => {
       res.status(200).json(adopters);
@@ -35,7 +39,26 @@ router.get('/:id', (req, res) => {
     });
 });
 
+router.get('/:id/dogs', async (req, res) => {
+  console.log('async/await version')
+  try {
+    const dogs = await Adopter.findDogs(req.params.id)
+    if (!dogs.length) {
+      res.status(404).json({ message: 'No dogs for this adopter' })
+    } else {
+      res.status(200).json(dogs)
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message: 'Error retrieving the dogs for this adopter',
+      rawError: err.message,
+    });
+  }
+});
+
 router.get('/:id/dogs', (req, res) => {
+  console.log('ES6 promise version')
   Adopter.findDogs(req.params.id)
     .then(dogs => {
       if (dogs.length > 0) {

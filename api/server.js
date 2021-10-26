@@ -7,7 +7,7 @@ const dogsRouter = require('./dogs/dogs-router')
 
 const server = express();
 
-server.use(express.json());
+server.use(express.json()); // teaches express to read JSON in req.body
 
 server.use('/api/adopters', adoptersRouter); // connecting the router
 server.use('/api/dogs', dogsRouter);
